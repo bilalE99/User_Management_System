@@ -1,3 +1,4 @@
+const { urlencoded } = require('body-parser');
 const mysql = require('mysql');
 
 
@@ -13,25 +14,26 @@ const pool = mysql.createPool({
 
 
 
-//View users
+//View all users
 exports.view = (req, res) => {
     pool.getConnection((err, connection) => {
         if (err) throw err;
         //console.log('Connection ID ' + connection.threadId)
 
         //User the connection
-        connection.query('SELECT * FROM user', (err, rows) => {
+        connection.query('SELECT * FROM user WHERE status = "active"', (err, rows) => {
 
             //When done with connection, release it
             connection.release();
 
             if (!err) {
-                res.render('home', { rows });
+                let removedUser = req.query.removed;
+                res.render('home', { rows , alert : removedUser});
 
             } else {
                 console.log(err);
             }
-            console.log('Data from user table : \n ', rows)
+            //console.log('Data from user table : \n ', rows)
         });
     });
 }
@@ -61,7 +63,7 @@ exports.find = (req, res) => {
             } else {
                 console.log(err);
             }
-            console.log('Data from user table : \n ', rows)
+            //console.log('Data from user table : \n ', rows)
         });
     });
 
@@ -69,7 +71,6 @@ exports.find = (req, res) => {
 
 exports.form = (req, res) => {
     res.render('add-User');
-
 }
 
 
@@ -86,8 +87,122 @@ exports.create = (req, res) => {
             } else {
                 console.log(err);
             }
-            console.log('Data from user table : \n ', rows)
+            //console.log('Data from user table : \n ', rows)
         });
     });
 
+}
+
+//Edit users
+exports.edit = (req, res) => {
+    pool.getConnection((err, connection) => {
+        if (err) throw err;
+        //User the connection
+        connection.query('SELECT * FROM user WHERE id = ?',[req.params.id],(err, rows) => {
+
+            //When done with connection, release it
+            connection.release();
+
+            if (!err) {
+                res.render('edit-User', { rows });
+            } else {
+                console.log(err);
+            }
+        });
+    });
+}
+
+//Update users
+exports.update = (req, res) => {
+    const{first_name, last_name, email, phone, comments} = req.body;
+
+    pool.getConnection((err, connection) => {
+        if (err) throw err;
+        //User the connection
+        connection.query('UPDATE user SET first_name = ?, last_name = ?, email = ?, phone = ? , comments = ? WHERE id = ?',[first_name, last_name,email,phone,comments, req.params.id],(err, rows) => {
+
+            //When done with connection, release it
+            connection.release();
+
+            if (!err) {
+
+                pool.getConnection((err, connection) => {
+                    if (err) throw err;
+                    //User the connection
+                    connection.query('SELECT * FROM user WHERE id = ?',[req.params.id],(err, rows) => {
+            
+                        //When done with connection, release it
+                        connection.release();
+            
+                        if (!err) {
+                            res.render('edit-User', { rows, alert: 'User Updated Successfully!' });
+                        } else {
+                            console.log(err);
+                        }
+                    });
+                });
+
+            } else {
+                console.log(err);
+            }
+        });
+    });
+}
+
+
+//Delete users
+exports.delete = (req, res) => {
+    /*
+    pool.getConnection((err, connection) => {
+        if (err) throw err;
+        //User the connection
+        connection.query('DELETE FROM user WHERE id = ?',[req.params.id],(err, rows) => {
+            //When done with connection, release it
+            connection.release();
+            if (!err) {
+                res.redirect('/');
+            } else {
+                console.log(err);
+            }
+        });
+    });
+    */
+
+    pool.getConnection((err, connection) => {
+        if (err) throw err;
+        //User the connection
+        connection.query('UPDATE user SET status = ? WHERE id = ?',['removed',req.params.id],(err, rows) => {
+            //When done with connection, release it
+            connection.release();
+            if (!err) {
+                let removedUser = encodeURIComponent('User Removed!');
+                res.redirect('/?removed= ' + removedUser);
+            } else {
+                console.log(err);
+            }
+        });
+    });
+}
+
+//View users
+exports.viewdata = (req, res) => {
+    pool.getConnection((err, connection) => {
+        if (err) throw err;
+        //console.log('Connection ID ' + connection.threadId)
+
+        //User the connection
+        connection.query('SELECT * FROM user WHERE id = ?',[req.params.id],(err, rows) => {
+
+            //When done with connection, release it
+            connection.release();
+
+            if (!err) {
+                res.render('view-User', { rows });
+
+            } else {
+                console.log(err);
+            }
+            //console.log('Data from user table : \n ', rows)
+        });
+    });
 }
