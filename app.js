@@ -9,7 +9,7 @@ const port = process.env.PORT || 5000;
 
 //Parsing middlewear
 //Parse application/x-www-form-urlencoded
-app.use(bodyParser.urlencoded({extended: false}));
+app.use(bodyParser.urlencoded({ extended: false }));
 
 //Parse application/json
 app.use(bodyParser.json());
@@ -18,13 +18,13 @@ app.use(bodyParser.json());
 app.use(express.static('public'));
 
 //Templating engine
-app.engine('hbs', exphbs.engine({extname: '.hbs'}));
+app.engine('hbs', exphbs.engine({ extname: '.hbs' }));
 app.set('view engine', 'hbs');
 
 
 //Connection Pool
 const pool = mysql.createPool({
-    connectionLimit : 100,
+    connectionLimit: 100,
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
@@ -33,13 +33,11 @@ const pool = mysql.createPool({
 
 //Connec to DB
 pool.getConnection((err, connection) => {
-    if(err) throw err;
+    if (err) throw err;
     console.log('Connection ID ' + connection.threadId)
 });
 
-//Router
-app.get('', (req, res) => {
-    res.render('home');
-})
+const routes = require('./server/routes/user');
+app.use('/', routes);
 
 app.listen(port, () => console.log(`Listening on port ${port}`));
