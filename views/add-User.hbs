@@ -12,6 +12,17 @@
 </div>
 {{/if}}
 
-<form class="row g-3 needs-validation" method="POST" action="/adduser" novalidate>
+{{#if errors}}
+<div class="alert alert-danger alert-dismissible fade show" role="alert">
+    <ul>
+      {{#each errors}}
+      <li>{{ this.msg }}</li>
+      {{/each}}
+    </ul>
+  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+{{/if}}
+
+<form class="row g-3 needs-validation" method="POST" action="/adduser" autocomplete="off" novalidate>
   {{> user-form}}
 </form>

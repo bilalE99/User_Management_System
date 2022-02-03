@@ -1,4 +1,5 @@
 const { urlencoded } = require('body-parser');
+const {check, validationResult} = require('express-validator');
 const mysql = require('mysql');
 
 
@@ -21,7 +22,7 @@ exports.view = (req, res) => {
         //console.log('Connection ID ' + connection.threadId)
 
         //User the connection
-        connection.query('SELECT * FROM user WHERE status = "active"', (err, rows) => {
+        connection.query('SELECT * FROM user', (err, rows) => {
 
             //When done with connection, release it
             connection.release();
@@ -44,13 +45,7 @@ exports.find = (req, res) => {
     pool.getConnection((err, connection) => {
         if (err) throw err;
         //console.log('Connection ID ' + connection.threadId)
-
-
         let searchValue = req.body.search;
-        //console.log(searchValue);
-
-
-
         //User the connection
         connection.query('SELECT * FROM user WHERE first_name LIKE ? OR last_name LIKE ?', ['%' + searchValue + '%', '%' + searchValue + '%'], (err, rows) => {
 
@@ -73,10 +68,13 @@ exports.form = (req, res) => {
     res.render('add-User');
 }
 
-
 //Add users
-exports.create = (req, res) => {
-    const{first_name, last_name, email, phone, comments} = req.body;
+exports.create = 
+(req, res) => {
+    
+
+    const {first_name, last_name, email, phone, comments} = req.body;
+    
     pool.getConnection((err, connection) => {
         if (err) throw err;
         //User the connection
@@ -152,7 +150,7 @@ exports.update = (req, res) => {
 
 //Delete users
 exports.delete = (req, res) => {
-    /*
+   
     pool.getConnection((err, connection) => {
         if (err) throw err;
         //User the connection
@@ -160,14 +158,15 @@ exports.delete = (req, res) => {
             //When done with connection, release it
             connection.release();
             if (!err) {
-                res.redirect('/');
+                let removedUser = encodeURIComponent('User Removed!');
+                res.redirect('/?removed= ' + removedUser);
             } else {
                 console.log(err);
             }
         });
     });
-    */
-
+   
+ /*
     pool.getConnection((err, connection) => {
         if (err) throw err;
         //User the connection
@@ -181,7 +180,7 @@ exports.delete = (req, res) => {
                 console.log(err);
             }
         });
-    });
+    }); */
 }
 
 //View users
